@@ -1,11 +1,21 @@
-﻿import React, { useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { LoginScreen, type User } from "../features/auth";
-import { BottomNavigation, type Screen } from "../shared/components/BottomNavigation";
-import { Colors } from "../shared/constants/colors";
-import { FontFamily, FontSize, FontWeight } from "../shared/styles/typography";
+import {
+  createBottomTabNavigator,
+  type BottomTabBarProps,
+} from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import React, { useState } from "react";
+import LoginScreen, { type User } from "../features/auth/screens/LoginScreen";
 
-const screenLabels: Record<Screen, string> = {
+import HomeScreen from "../features/home/screens/HomeScreen";
+import { BottomNavigation, type Screen } from "../shared/components/BottomNavigation";
+
+type AppTabsParamList = {
+  home: undefined;
+};
+
+const Tab = createBottomTabNavigator<AppTabsParamList>();
+
+const TAB_TITLES: Record<Screen, string> = {
   home: "الرئيسية",
   explore: "استكشف",
   "add-menu": "إضافة جديد",
@@ -13,19 +23,31 @@ const screenLabels: Record<Screen, string> = {
   profile: "حسابي",
 };
 
-function MainApp() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>("home");
-  const currentLabel = useMemo(() => screenLabels[currentScreen], [currentScreen]);
+function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+  const currentScreen = (state.routes[state.index]?.name as Screen) ?? "home";
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>{currentLabel}</Text>
-        <Text style={styles.subtitle}>Bottom navigation</Text>
-      </View>
+    <BottomNavigation
+      currentScreen={currentScreen}
+      onChangeScreen={(screen) => {
+        if (screen === "home") {
+          navigation.navigate("home");
+        }
+       
+      }}
+    />
+  );
+}
 
-      <BottomNavigation currentScreen={currentScreen} onChangeScreen={setCurrentScreen} />
-    </View>
+function MainTabs() {
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
+    >
+            <Tab.Screen name="home" component={HomeScreen} options={{ title: TAB_TITLES.home }} />
+
+    </Tab.Navigator>
   );
 }
 
@@ -36,30 +58,9 @@ export default function AppNavigator() {
     return <LoginScreen onSuccess={setUser} />;
   }
 
-  return <MainApp />;
+  return (
+    <NavigationContainer>
+      <MainTabs />
+    </NavigationContainer>
+  );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16,
-  },
-  title: {
-    fontSize: FontSize.hero,
-    fontWeight: FontWeight.extrabold,
-    color: Colors.foreground,
-    fontFamily: FontFamily.cairo,
-  },
-  subtitle: {
-    marginTop: 8,
-    fontSize: FontSize.md,
-    color: Colors.mutedForeground,
-    fontFamily: FontFamily.cairo,
-  },
-});

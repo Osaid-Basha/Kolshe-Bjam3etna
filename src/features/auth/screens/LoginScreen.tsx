@@ -5,8 +5,42 @@ import { Dimensions } from "../../../shared/constants/dimensions";
 import { Spacing } from "../../../shared/constants/spacing";
 import { STRINGS } from "../../../shared/constants/strings";
 import { FontFamily, FontSize, FontWeight } from "../../../shared/styles/typography";
-import { login } from "../auth.repo";
-import type { User } from "../auth.types";
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+type LoginInput = {
+  email: string;
+  password: string;
+};
+
+const MOCK_USERS: (User & { password: string })[] = [
+  {
+    id: "1",
+    name: "Test User",
+    email: "test@test.com",
+    password: "123456",
+  },
+];
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function login(input: LoginInput): Promise<User> {
+  await delay(250);
+
+  const user = MOCK_USERS.find(
+    (item) => item.email.toLowerCase() === input.email.trim().toLowerCase()
+  );
+
+  if (!user || user.password !== input.password) {
+    throw new Error("Invalid email or password");
+  }
+
+  return { id: user.id, name: user.name, email: user.email };
+}
 
 type LoginScreenProps = {
   onSuccess: (user: User) => void;

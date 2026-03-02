@@ -1,15 +1,16 @@
-﻿import React from "react";
+import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors, SemanticColors } from "../constants/colors";
 import { Dimensions } from "../constants/dimensions";
+import { IconSet } from "../constants/icons";
 import { FontFamily, FontSize, FontWeight } from "../styles/typography";
 
 export type Screen = "home" | "explore" | "add-menu" | "messages" | "profile";
 
 type NavItem = {
-  icon: "home" | "compass" | "add" | "chatbubble" | "person";
+  icon: (typeof IconSet.nav)[number];
   label: string;
   screen: Screen;
 };
@@ -20,12 +21,32 @@ type BottomNavigationProps = {
 };
 
 const navItems: NavItem[] = [
-  { icon: "home", label: "الرئيسية", screen: "home" },
-  { icon: "compass", label: "استكشف", screen: "explore" },
-  { icon: "add", label: "", screen: "add-menu" },
-  { icon: "chatbubble", label: "الرسائل", screen: "messages" },
-  { icon: "person", label: "حسابي", screen: "profile" },
+  { icon: IconSet.nav[0], label: "الرئيسية", screen: "home" },
+  { icon: IconSet.nav[1], label: "استكشف", screen: "explore" },
+  { icon: IconSet.nav[2], label: "", screen: "add-menu" },
+  { icon: IconSet.nav[3], label: "الرسائل", screen: "messages" },
+  { icon: IconSet.nav[4], label: "حسابي", screen: "profile" },
 ];
+
+function toIoniconName(icon: (typeof IconSet.nav)[number], active: boolean) {
+  if (icon === "Home") {
+    return active ? "home" : "home-outline";
+  }
+
+  if (icon === "Compass") {
+    return active ? "compass" : "compass-outline";
+  }
+
+  if (icon === "MessageCircle") {
+    return active ? "chatbubble" : "chatbubble-outline";
+  }
+
+  if (icon === "User") {
+    return active ? "person" : "person-outline";
+  }
+
+  return "add";
+}
 
 export function BottomNavigation({
   currentScreen,
@@ -61,19 +82,13 @@ export function BottomNavigation({
                     pressed && styles.centerButtonPressed,
                   ]}
                 >
-                  <Ionicons name="add" size={24} color="#ffffff" />
+                  <Ionicons name={toIoniconName(item.icon, true)} size={24} color="#ffffff" />
                   <View style={styles.innerGlow} pointerEvents="none" />
                 </Pressable>
               );
             }
 
-            const iconName = isActive
-              ? item.icon
-              : (`${item.icon}-outline` as
-                  | "home-outline"
-                  | "compass-outline"
-                  | "chatbubble-outline"
-                  | "person-outline");
+            const iconName = toIoniconName(item.icon, isActive);
 
             return (
               <Pressable
